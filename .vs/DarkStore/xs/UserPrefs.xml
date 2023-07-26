@@ -1,0 +1,26 @@
+﻿<Properties StartupConfiguration="{7416A6A3-6AFF-4706-A008-F9C5E79DBA04}|Default">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.DarkStore.Web PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workbench ActiveDocument="DarkStore.Api/Entities/Product.cs">
+    <Files>
+      <File FileName="DarkStore.Api/Entities/User.cs" Line="11" Column="2" />
+      <File FileName="DarkStore.Api/Entities/Category.cs" Line="14" Column="2" />
+      <File FileName="DarkStore.Api/Entities/Product.cs" Line="20" Column="39" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="DarkStore">
+            <Node name="DarkStore.Api" expanded="True" />
+            <Node name="DarkStore.Web" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+</Properties>

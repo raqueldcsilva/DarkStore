@@ -62,5 +62,21 @@ namespace DarkStore.Api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
+        [HttpGet]
+        [Route("productsByCategory/{categoryId}")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsByCategory(int categoryId)
+        {
+            try
+            {
+                var products = await _productRepository.GetItemsByCategory(categoryId);
+                var productDto = products.ConvertProductsToDto();
+                return Ok(productDto);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 }

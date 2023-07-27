@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.15" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.9" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
@@ -17,6 +18,14 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DarkStore.Models\DarkStore.Models.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Controllers\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Controllers\Products.cs" />
     </ItemGroup>
 
 </Project>

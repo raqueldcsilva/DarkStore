@@ -26,7 +26,11 @@ else
                 </b>
             </p>
             <div>
-                <button class="btn btn-success">
+                <button class="btn btn-success" @onclick="() => AddToShoppingCart(new SelectedShoppingCartDto { 
+                            ShoppingCartId = LoginUser.ShoppingCartId, 
+                            ProductId = Product.Id, 
+                            Quantity = 1 })
+                    ">
                     Incluir no Carrinho
                 </button>
             </div>
@@ -38,6 +42,8 @@ else
 @code {
     [Inject]
     public IProductService? ProductService { get; set; }
+    [Inject]
+    public IShoppingCartService? ShoppingCartService { get; set; }
     
     [Parameter]
     public int Id { get; set; }
@@ -54,6 +60,19 @@ else
         catch (Exception e)
         {
             ErrorMessage = e.Message;
+        }
+    }
+
+    protected async Task AddToShoppingCart(SelectedShoppingCartDto selectedShoppingCartDto)
+    {
+        try
+        {
+            var shoppingCartDto = await ShoppingCartService.AddItem(selectedShoppingCartDto);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
         }
     }
 }

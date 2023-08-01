@@ -1,0 +1,178 @@
+@using System.Globalization
+@page "/buy"
+@inject IJSRuntime JsRuntime
+
+@if (shoppingCartItems == null && ErrorMessage == null)
+{
+    <Loading></Loading>
+}
+else if (ErrorMessage != null)
+{
+    <ShowError ErrorMessage="@ErrorMessage"></ShowError>
+}
+else
+{
+    <h3 class="mb-5">Carrinho de compras</h3>
+    @if (shoppingCartItems.Count() > 0)
+    {
+        <div class="row mb-5">
+            <div class="col-md-9">
+                @foreach (var item in shoppingCartItems)
+                {
+                    <div class="row mb-3">
+                        <div>
+                            <img src="@item.ProductImageUrl" width="250" class="img-thumbnail"/>
+                        </div>
+                        <div class="col-md-9">
+                            <h5>@item.ProductName</h5>
+                            <div class="mb-4">
+                                @item.ProductDescription
+                            </div>
+                            <span>Preço: <b>@item.Price.ToString("c", CultureInfo.GetCultureInfo("pt-BR"))</b></span>
+                            <input @oninput="() => UpdateQuantityInput(item.Id)" type="number" @bind="@item.Quantity"/>
+                            <button data-itemId="@item.Id" class="btn btn-info btn-sm update-quantity" @onclick="(() 
+                            => UpdateShoppingCartQuantity(item
+                            .Id, item.Quantity))">
+                                <i class="oi oi-check"></i>
+                            </button>
+                            <br/>
+                            <button @onclick="(() => DeleteShoppingCartItem(item.Id))" class="btn btn-danger sm">
+                                <span class="oi oi-trash"></span>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="col-md-3">
+                <h5>Resumo do Carrinho</h5>
+                <div class="mt-2">
+                    <div>Total - (@TotalQuantity itens)&nbsp; <br/> <b>@TotalPrice</b></div>
+                    <a href="#" class="btn btn-success">
+                        <span class="oi oi-credit-card"></span>&nbsp; Fechar Pedido
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>
+            <h3><b>Seu carrinho está vazio</b></h3>
+        </div>
+    }
+}
+
+@code {
+    [Inject]
+    public IShoppingCartService? shoppingCartService { get; set; }
+    public List<ShoppingCartItemDto> shoppingCartItems { get; set; }
+    public string? ErrorMessage { get; set; }
+    protected string? TotalPrice { get; set; }
+    protected int TotalQuantity { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            shoppingCartItems = await shoppingCartService.GetItems(LoginUser.UserId);
+            //TotalShoppingCart();
+            ShoppingCartChanged();
+        }
+        catch (Exception e)
+        {
+            ErrorMessage = e.Message;
+        }
+    }
+
+    protected async Task DeleteShoppingCartItem(int id)
+    {
+        var shoppingCartItemDto = await shoppingCartService.DeleteItem(id);
+
+        await RemoveShoppingCartItem(id);
+        //TotalShoppingCart();
+        ShoppingCartChanged();
+    }
+
+    private ShoppingCartItemDto GetShoppingCartItem(int id)
+    {
+        return shoppingCartItems.FirstOrDefault(i => i.Id == id);
+    }
+
+    private async Task RemoveShoppingCartItem(int id)
+    {
+        var shoppingCartItemDto = GetShoppingCartItem(id);
+        shoppingCartItems.Remove(shoppingCartItemDto);
+    }
+
+    protected async Task UpdateShoppingCartQuantity(int id, int quantity)
+    {
+        try
+        {
+            if (quantity > 0)
+            {
+                var updateItem = new UpdateQuantityShoppingCartDto()
+                {
+                    ShoppingCartItemId = id,
+                    Quantity = quantity
+                };
+
+                var returnItemDto = await shoppingCartService.UpdateShoppingCartQuantity(updateItem);
+
+                UpdateTotalPriceItems(returnItemDto);
+                //TotalShoppingCart();
+                ShoppingCartChanged();
+                await JsRuntime.InvokeVoidAsync("updateQuantityInput", id, false);
+            }
+            else
+            {
+                var item = shoppingCartItems.FirstOrDefault(i => i.Id == id);
+                if (item is not null)
+                {
+                    item.Quantity = 1;
+                    item.TotalPrice = item.Price;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    private void SetTotalPrice()
+    {
+        TotalPrice = shoppingCartItems.Sum(p => p.TotalPrice).ToString("c", CultureInfo.GetCultureInfo("pt-BR"));
+    }
+    
+    private void SetTotalQuantity()
+    {
+        TotalQuantity = shoppingCartItems.Sum(p => p.Quantity);
+    }
+
+    private void TotalShoppingCart()
+    {
+        SetTotalPrice();
+        SetTotalQuantity();
+    }
+
+    private void UpdateTotalPriceItems(ShoppingCartItemDto shoppingCartItemDto)
+    {
+        var item = GetShoppingCartItem(shoppingCartItemDto.Id);
+        if (item != null)
+        {
+            item.TotalPrice = shoppingCartItemDto.Price * shoppingCartItemDto.Quantity;
+        }
+    }
+
+    protected async Task UpdateQuantityInput(int id)
+    {
+        await JsRuntime.InvokeVoidAsync("updateQuantityInput", id, true);
+    }
+
+    private void ShoppingCartChanged()
+    {
+        TotalShoppingCart();
+        shoppingCartService.RaiseEventOnShoppingCartChanged(TotalQuantity);
+    }
+}

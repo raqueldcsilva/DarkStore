@@ -34,7 +34,7 @@ public class ProductsController : ControllerBase
                 return Ok(productsDto);
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -57,7 +57,7 @@ public class ProductsController : ControllerBase
                 return Ok(productDto);
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -73,7 +73,23 @@ public class ProductsController : ControllerBase
             var productDto = products.ConvertProductsToDto();
             return Ok(productDto);
         }
-        catch (Exception e)
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet]
+    [Route("categories")]
+    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
+    {
+        try
+        {
+            var categories = await _productRepository.GetCategories();
+            var categoriesDto = categories.ConvertCategoryToDto();
+            return Ok(categoriesDto);
+        }
+        catch (Exception)
         {
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

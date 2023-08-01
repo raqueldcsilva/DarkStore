@@ -30,10 +30,18 @@ else
 
 @code {
     public IEnumerable<ProductDto>? Products { get; set; }
+    
+    [Inject]
+    public IShoppingCartService? ShoppingCartService { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Products = await productService.GetProducts();
+
+        var shoppingCartItems = await ShoppingCartService.GetItems(LoginUser.UserId);
+        var totalQuantity = shoppingCartItems.Sum(i => i.Quantity);
+        
+        ShoppingCartService.RaiseEventOnShoppingCartChanged(totalQuantity);
     }
 
 }

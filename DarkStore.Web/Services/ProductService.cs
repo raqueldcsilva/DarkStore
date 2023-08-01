@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using DarkStore.Models.DTOs;
 using DarkStore.Web.Services.Interfaces;
+using Exception = System.Exception;
 
 namespace DarkStore.Web.Services;
 
@@ -55,6 +56,61 @@ public class ProductService : IProductService
         catch (Exception e)
         {
             _loggger.LogError("Error to access products: api/product");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<CategoryDto>> GetCategories()
+    {
+        try
+        {
+            var response = await _HttpClient.GetAsync("api/Products/categories");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return Enumerable.Empty<CategoryDto>();
+                }
+
+                return await response.Content.ReadFromJsonAsync<IEnumerable<CategoryDto>>();
+            }
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Status Code: {response.StatusCode} - {message}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<ProductDto>> GetItemsByCategory(int categoryId)
+    {
+        try
+        {
+            var response = await _HttpClient.GetAsync($"api/Products/productsByCategory/{categoryId}");
+            if (response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    return Enumerable.Empty<ProductDto>();
+                }
+
+                return await response.Content.ReadFromJsonAsync<IEnumerable<ProductDto>>();
+            }
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Status Code: {response.StatusCode} - {message}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
             throw;
         }
     }

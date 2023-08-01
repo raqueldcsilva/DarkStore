@@ -1,0 +1,56 @@
+@page "/ProductsByCategory/{CategoryId:int}"
+
+@if (ProductDto == null && ErrorMessage == null)
+{
+    <Loading/>
+}
+else if (ErrorMessage != null)
+{
+    <ShowError ErrorMessage="@ErrorMessage"></ShowError>
+}
+else
+{
+    <h3>Produtos (@CategoryName)</h3>
+    @if (ProductDto.Count() > 0)
+    {
+        <div class="row mt-3">
+            <ShowProduct Products="@ProductDto"></ShowProduct>
+        </div>
+    }
+}
+
+
+@code {
+    [Parameter]
+    public int CategoryId { get; set; }
+    
+    [Inject]
+    public IProductService ProductService { get; set; }
+    
+    public IEnumerable<ProductDto>? ProductDto { get; set; }
+    public string? CategoryName { get; set; }
+    public string ? ErrorMessage { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            ProductDto = await ProductService.GetItemsByCategory(CategoryId);
+
+            if (ProductDto != null && ProductDto.Count() > 0)
+            {
+                var productDto = ProductDto.FirstOrDefault(p => p.CategoryId == CategoryId);
+                if (productDto != null)
+                {
+                    CategoryName = productDto.CategoryName;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+}

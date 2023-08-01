@@ -28,7 +28,7 @@ public class ShoppingCartController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{userId}/items")]
+    [Route("{userId:int}/items")]
     public async Task<ActionResult<IEnumerable<ShoppingCartItemDto>>> GetItems(int userId)
     {
         try
@@ -108,6 +108,59 @@ public class ShoppingCartController : ControllerBase
         {
             _logger.LogError("Error creation of the new item in Shopping cart");
             return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<ShoppingCartItemDto>> DeleteShoppingCartItem(int id)
+    {
+        try
+        {
+            var shoppingCartItem = await _shoppingCartRepository.DeleteItem(id);
+
+            if (shoppingCartItem == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetItem(shoppingCartItem.ProductId);
+
+            if (product is null)
+            {
+                return NotFound();
+            }
+
+            var shoppingCartItemDto = shoppingCartItem.ConvertShoppingCartItemToDto(product);
+            return Ok(shoppingCartItemDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error deleting item in Shopping cart");
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpPatch("{id:int}")]
+    public async Task<ActionResult<ShoppingCartItemDto>> UpdateQuantity(int id,
+        UpdateQuantityShoppingCartDto updateQuantityShoppingCartDto)
+    {
+        try
+        {
+            var shoppingCartItem = await _shoppingCartRepository.UpdateQuantity(id, updateQuantityShoppingCartDto);
+
+            if (shoppingCartItem == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetItem(shoppingCartItem.ProductId);
+            var shoppingCartItemDto = shoppingCartItem.ConvertShoppingCartItemToDto(product);
+            return Ok(shoppingCartItemDto);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
 }

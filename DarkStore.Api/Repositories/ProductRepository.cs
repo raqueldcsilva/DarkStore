@@ -33,4 +33,10 @@ public class ProductRepository : IProductRepository
         
         return products;
     }
+
+    public async Task<IEnumerable<Category>> GetCategories()
+    {
+        var categories = await _context.Categories.ToListAsync();
+        return categories;
+    }
 }

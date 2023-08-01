@@ -42,8 +42,12 @@ else
 @code {
     [Inject]
     public IProductService? ProductService { get; set; }
+    
     [Inject]
     public IShoppingCartService? ShoppingCartService { get; set; }
+    
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
     
     [Parameter]
     public int Id { get; set; }
@@ -68,6 +72,7 @@ else
         try
         {
             var shoppingCartDto = await ShoppingCartService.AddItem(selectedShoppingCartDto);
+            NavigationManager.NavigateTo("/buy");
         }
         catch (Exception e)
         {

@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using DarkStore.Web;
@@ -17,5 +18,9 @@ builder.Services.AddScoped(sp => new HttpClient
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+builder.Services.AddScoped<IManageShoppingCartItemsLocalStorageService, ManageShoppingCartItemsLocalStorageService>();
+builder.Services.AddScoped<IManageProductsLocalStorageService, ManagerProductsLocalStorageService>();
+
+builder.Services.AddBlazoredLocalStorage();
 
 await builder.Build().RunAsync();

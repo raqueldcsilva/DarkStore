@@ -21,12 +21,18 @@ else
 
 
 @code {
-    [Parameter]
-    public int CategoryId { get; set; }
+    [Inject]
+    public IManageProductsLocalStorageService ManageProductsLocalStorageService { get; set; }
+    
+    [Inject]
+    public IManageShoppingCartItemsLocalStorageService ManageShoppingCartItemsLocalStorageService { get; set; }
     
     [Inject]
     public IProductService ProductService { get; set; }
-    
+
+    [Parameter]
+    public int CategoryId { get; set; }
+
     public IEnumerable<ProductDto>? ProductDto { get; set; }
     public string? CategoryName { get; set; }
     public string ? ErrorMessage { get; set; }
@@ -35,7 +41,8 @@ else
     {
         try
         {
-            ProductDto = await ProductService.GetItemsByCategory(CategoryId);
+            //ProductDto = await ProductService.GetItemsByCategory(CategoryId);
+            ProductDto = await GetCollectionProductByCategoryId(CategoryId);
 
             if (ProductDto != null && ProductDto.Count() > 0)
             {
@@ -53,4 +60,17 @@ else
         }
     }
 
+    private async Task<IEnumerable<ProductDto>> GetCollectionProductByCategoryId(int categoryId)
+    {
+        var productCollection = await ManageProductsLocalStorageService.GetCollection();
+
+        if (productCollection != null)
+        {
+            return productCollection.Where(p => p.CategoryId == categoryId);
+        }
+        else
+        {
+            return await ProductService.GetItemsByCategory(categoryId);
+        }
+    }
 }

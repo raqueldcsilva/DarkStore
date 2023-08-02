@@ -29,19 +29,43 @@ else
 }    
 
 @code {
-    public IEnumerable<ProductDto>? Products { get; set; }
-    
     [Inject]
     public IShoppingCartService? ShoppingCartService { get; set; }
+    
+    [Inject]
+    public IManageProductsLocalStorageService ManagerProductsLocalStorageService { get; set; }
+    
+    [Inject]
+    public IManageShoppingCartItemsLocalStorageService ManageShoppingCartItemsLocalStorageService { get; set; }
+    
+    public IEnumerable<ProductDto>? Products { get; set; }
+    
+    public string? ErrorMessage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Products = await productService.GetProducts();
+        try
+        {
+            await ClearLocalStorage();
+            //Products = await productService.GetProducts();
+            Products = await ManagerProductsLocalStorageService.GetCollection(); 
 
-        var shoppingCartItems = await ShoppingCartService.GetItems(LoginUser.UserId);
-        var totalQuantity = shoppingCartItems.Sum(i => i.Quantity);
+            //var shoppingCartItems = await ShoppingCartService.GetItems(LoginUser.UserId);
+            var shoppingCartItems = await ManageShoppingCartItemsLocalStorageService.GetCollection();
+            var totalQuantity = shoppingCartItems.Sum(i => i.Quantity);
         
-        ShoppingCartService.RaiseEventOnShoppingCartChanged(totalQuantity);
+            ShoppingCartService.RaiseEventOnShoppingCartChanged(totalQuantity);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task ClearLocalStorage()
+    {
+        await ManagerProductsLocalStorageService.RemoveCollection();
+        await ManageShoppingCartItemsLocalStorageService.RemoveCollection();
     }
 
 }

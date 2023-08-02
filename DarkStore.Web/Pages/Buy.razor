@@ -65,6 +65,13 @@ else
 @code {
     [Inject]
     public IShoppingCartService? shoppingCartService { get; set; }
+    
+    [Inject]
+    public IManageProductsLocalStorageService ManageProductsLocalStorageService { get; set; }
+    
+    [Inject]
+    public IManageShoppingCartItemsLocalStorageService ManageShoppingCartItemsLocalStorageService { get; set; }
+    
     public List<ShoppingCartItemDto> shoppingCartItems { get; set; }
     public string? ErrorMessage { get; set; }
     protected string? TotalPrice { get; set; }
@@ -74,7 +81,8 @@ else
     {
         try
         {
-            shoppingCartItems = await shoppingCartService.GetItems(LoginUser.UserId);
+            //shoppingCartItems = await shoppingCartService.GetItems(LoginUser.UserId);
+            shoppingCartItems = await ManageShoppingCartItemsLocalStorageService.GetCollection();
             //TotalShoppingCart();
             ShoppingCartChanged();
         }
@@ -102,6 +110,8 @@ else
     {
         var shoppingCartItemDto = GetShoppingCartItem(id);
         shoppingCartItems.Remove(shoppingCartItemDto);
+        await ManageShoppingCartItemsLocalStorageService.SaveCollection(shoppingCartItems);
+
     }
 
     protected async Task UpdateShoppingCartQuantity(int id, int quantity)
@@ -156,13 +166,14 @@ else
         SetTotalQuantity();
     }
 
-    private void UpdateTotalPriceItems(ShoppingCartItemDto shoppingCartItemDto)
+    private async Task UpdateTotalPriceItems(ShoppingCartItemDto shoppingCartItemDto)
     {
         var item = GetShoppingCartItem(shoppingCartItemDto.Id);
         if (item != null)
         {
             item.TotalPrice = shoppingCartItemDto.Price * shoppingCartItemDto.Quantity;
         }
+        await ManageShoppingCartItemsLocalStorageService.SaveCollection(shoppingCartItems);
     }
 
     protected async Task UpdateQuantityInput(int id)
